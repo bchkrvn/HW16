@@ -1,5 +1,5 @@
 import json
-from main import *
+from app import *
 import datetime
 
 PATH_USERS = './data/Users.json'
@@ -7,7 +7,16 @@ PATH_OFFERS = './data/Offers.json'
 PATH_ORDERS = './data/Orders.json'
 
 
-def load_data(path):
+# Step 2
+# Этот файл был предназначен для передачи данных из json в БД
+
+
+def load_data(path) -> list[dict]:
+    """
+    Загружает данные из json по пути path
+    :param path: путь
+    :return: list[dict]
+    """
     with open(path, encoding='utf-8') as file:
         result = json.load(file)
 
@@ -15,6 +24,9 @@ def load_data(path):
 
 
 def add_users_data():
+    """
+    Загружает из json в БД пользователей
+    """
     users_json = load_data(PATH_USERS)
     users_db = []
 
@@ -37,6 +49,9 @@ def add_users_data():
 
 
 def add_offers_data():
+    """
+        Загружает из json в БД офферы
+    """
     offers_json = load_data(PATH_OFFERS)
     offers_db = []
 
@@ -55,19 +70,19 @@ def add_offers_data():
 
 
 def add_orders_data():
+    """
+        Загружает из json в БД заказы
+    """
     orders_json = load_data(PATH_ORDERS)
     orders_db = []
 
     for order in orders_json:
-        start_date_ = order['start_date'].split('/')
-        end_date_ = order['end_date'].split('/')
-
         new_order = Order(
             id=order['id'],
             name=order['name'],
             description=order['description'],
-            start_date=datetime.date(int(start_date_[2]), int(start_date_[0]), int(start_date_[1])),
-            end_date=datetime.date(int(end_date_[2]), int(end_date_[0]), int(end_date_[1])),
+            start_date=datetime.datetime.strptime(order['start_date'], "%m/%d/%Y").date(),
+            end_date=datetime.datetime.strptime(order['end_date'], "%m/%d/%Y").date(),
             address=order['address'],
             price=order['price'],
             customer_id=order['customer_id'],
@@ -79,6 +94,3 @@ def add_orders_data():
         db.session.add_all(orders_db)
         db.session.commit()
         db.session.close()
-
-
-add_offers_data()
